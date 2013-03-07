@@ -1,11 +1,11 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'miu-plugin-sana/version'
+require 'miu-plugin-pannya/version'
 
 Gem::Specification.new do |gem|
   gem.authors       = ["Haruto Otake"]
-  gem.email         = ["haruto_otake@qteras.co.jp"]
+  gem.email         = ["trapezoid.g@gmail.com"]
   gem.description   = %q{TODO: Write a gem description}
   gem.summary       = %q{TODO: Write a gem summary}
   gem.homepage      = ""
@@ -19,5 +19,4 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency 'miu'
   gem.add_dependency 'reel'
-  gem.add_development_dependency "middleman", "~>3.0.11"
 end
