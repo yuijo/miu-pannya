@@ -1,0 +1,41 @@
+---
+title: Pannya
+---
+<article hm-swipeleft="switchView()" hm-swiperight="switchView()" hm-doubletap="isIconVisible = !isIconVisible;" hm-options="{drag: true, drag_block_horizontal: true,swipe: true}">
+    <h1 ng-click="switchView()" ng-switch="front">
+        <span ng-switch-when="onlyRoomList">Channels</span>
+         <span ng-switch-default>{{room.name}}@{{room.network.name}}</span>
+    </h1>
+    <article class="room" isIconVisible="{{isIconVisible}}" ng-show="front == 'room' && room.messages">
+        <section class="room-say">
+            <form>
+            </form>
+        </section>
+        <section class="room-log">
+            <p ng-repeat="message in room.messages" >
+                <img class="room-icon" ng-src="https://api.twitter.com/1/users/profile_image?screen_name={{message.miu.content.user.name}}&size=normal" ng-show="isIconVisible" >
+                <span class="room-talker" ng-class="{room_talker_with_icon: isIconVisible}">{{message.miu.content.user.name}}</span>
+                <span class="room-content" ng-class="{room_content_with_icon: isIconVisible}">{{message.miu.content.text}}</span>
+            </p>
+        </section>
+    </article>
+    <article class="roomlist" ng-show="front == 'roomList' || front == 'onlyRoomList'">
+        <p ng-repeat="room in rooms | orderBy:predicate" ng-click="openRoom(room.id)">
+            {{room.name}}@{{room.network.name}}
+        </p>
+    </article>
+</article>
+
+<!--
+ hm-options="stop_browser_behavior: {
+                userSelect: 'none',
+                touchCallout: 'none',
+                contentZooming: 'none',
+                userDrag: 'none',
+                tapHighlightColor: 'rgba(0,0,0,0)'
+              },
+              drag: true,
+              drag_block_horizontal: true,
+              swipe: true,
+  }"
+-->
