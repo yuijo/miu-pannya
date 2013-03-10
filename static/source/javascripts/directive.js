@@ -25,7 +25,7 @@
       var data = JSON.parse(ev.data);
       switch (data.type) {
         case "log":
-          $scope.emit('receiveLog',data.packet);
+          miuService.$scope.$emit('receiveLog', data.packet);
           break;
         case 'authChallenge':
           break;

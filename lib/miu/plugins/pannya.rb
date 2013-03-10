@@ -19,12 +19,6 @@ module Miu
           p [tag, time, record]
           record = {:type => 'log', :packet => {:tag => tag, :time => time, :miu => record}}
           @channel.push record.to_json
-          #emit_message!(tag, time, record)
-        end
-
-        def emit_message(tag, time, record)
-          p [tag, time, record]
-          #publish 'message_receive' , {:tag => tag, :time => time, :miu => JSON.parse(record)}
         end
       end
 
@@ -38,22 +32,19 @@ module Miu
       def run(options)
         host = options[:host]
         port = options[:port]
-        puts "run1"
 
         @channel = EventMachine::Channel.new
 
         @server = MessagePack::RPC::Server.new
         @server.listen host, port, MessageEmitter.new(@channel)
-        puts "run2"
+
         [:TERM, :INT].each do |sig|
           Signal.trap(sig) { @server.stop }
         end
-        puts "run3"
+
         @msgpack_thread = Thread.new(@server) do |server|
           server.run
         end
-        puts "run4"
-
 
         EM.run do
           EventMachine::WebSocket.start(:host => '0.0.0.0', :port => 8080) do |ws|
@@ -74,7 +65,6 @@ module Miu
             }
           end
         end
-        puts "runned"
       end
 
       register :pannya, :desc => %(miu log viewer plugin 'pannya') do
