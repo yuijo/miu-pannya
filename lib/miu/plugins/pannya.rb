@@ -1,43 +1,30 @@
 require 'miu/plugin'
 require 'json'
-require 'reel'
+require 'thin'
+require 'rack'
+require 'rack/websocket'
+require 'em-websocket'
 
 module Miu
   module Plugins
     class Pannya
       include Miu::Plugin
 
-      class WebSocketHandler
-        include Celluloid
-        include Celluloid::Notifications
-        include Celluloid::Logger
-
-        def initialize(web_socket)
-          @ws = web_socket
-          subscribe('message_receive', :on_message)
-        end
-
-        def on_message(message)
-          @ws << message.to_json
-        end
-      end
-
-
       class MessageEmitter
-        include Celluloid
-        include Celluloid::Notifications
-
-        def initialize
+        def initialize(channel)
+          @channel = channel
         end
 
         def log(tag, time, record)
           p [tag, time, record]
-          emit_message!(tag, time, record)
+          record = {:tag => tag, :time => time, :miu => record}
+          @channel.push record.to_json
+          #emit_message!(tag, time, record)
         end
 
         def emit_message(tag, time, record)
           p [tag, time, record]
-          publish 'message_receive' , {:tag => tag, :time => time, :miu => JSON.parse(record)}
+          #publish 'message_receive' , {:tag => tag, :time => time, :miu => JSON.parse(record)}
         end
       end
 
@@ -51,28 +38,56 @@ module Miu
       def run(options)
         host = options[:host]
         port = options[:port]
+        puts "run1"
+
+        @channel = EventMachine::Channel.new
 
         @server = MessagePack::RPC::Server.new
-        @server.listen host, port, MessageEmitter.new
-
+        @server.listen host, port, MessageEmitter.new(@channel)
+        puts "run2"
         [:TERM, :INT].each do |sig|
           Signal.trap(sig) { @server.stop }
         end
+        puts "run3"
+        @msgpack_thread = Thread.new(@server) do |server|
+          server.run
+        end
+        puts "run4"
 
-        @server.run
 
-        @websocket = nil
+        EM.run do
+          EventMachine::WebSocket.start(:host => '0.0.0.0', :port => 8080) do |ws|
+            ws.onopen {
+              sid = @channel.subscribe { |msg| ws.send msg }
+              #@channel.push "#{sid} connected!"
+
+              ws.onmessage { |msg|
+                puts msg
+                #@channel.push "<#{sid}>: #{msg}"
+              }
+
+              ws.onclose {
+                @channel.unsubscribe(sid)
+              }
+
+              puts "Connected!"
+            }
+          end
+        end
+        puts "runned"
       end
 
-      register :pannya, :desc => %(miu groonga plugin 'pannya') do
+      register :pannya, :desc => %(miu log viewer plugin 'pannya') do
         desc 'start', %(start pannya)
-        option :bind, :type => :string, :default => '127.0.0.1', :desc => 'bind address', :aliases => '-a'
-        option :port, :type => :numeric, :default => 30303, :desc => 'listen port', :aliases => '-p'
+        option :bind, :type => :string, :default => '127.0.0.1', :desc => 'msgpack-rpc bind address', :aliases => '-a'
+        option :port, :type => :numeric, :default => 30303, :desc => 'msgpack-rpc listen port', :aliases => '-p'
         def start
           Pannya.new options
         end
 
         desc 'init', %(init pannya config)
+        option :bind, :type => :string, :default => '127.0.0.1', :desc => 'msgpack-rpc bind address', :aliases => '-a'
+        option :port, :type => :numeric, :default => 30303, :desc => 'msgpack-rpc listen port', :aliases => '-p'
         def init
           append_to_file 'config/miu.god', <<-CONF
 
