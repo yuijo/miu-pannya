@@ -17,7 +17,7 @@ module Miu
 
         def log(tag, time, record)
           p [tag, time, record]
-          record = {:tag => tag, :time => time, :miu => record}
+          record = {:type => 'log', :packet => {:tag => tag, :time => time, :miu => record}}
           @channel.push record.to_json
           #emit_message!(tag, time, record)
         end

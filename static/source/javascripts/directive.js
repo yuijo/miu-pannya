@@ -16,10 +16,29 @@
       //miuService.connection.send("!!!testData!!!");
       //miuService.connection.send("!!!testData!!!");
       //miuService.connection.send("!!!testData!!!");
+      miuService.connection.send(JSON.stringify({
+        'type': 'authRequest',
+        'packet': {}
+      }));
     };
     miuService.connection.onmessage = function(ev) {
-      var logData = JSON.parse(ev.data);
-      $scope.emit('receiveLog',logData);
+      var data = JSON.parse(ev.data);
+      switch (data.type) {
+        case "log":
+          $scope.emit('receiveLog',data.packet);
+          break;
+        case 'authChallenge':
+          break;
+      }
+    };
+    miuService.auth = function(password, challenge) {
+      this.connection.send(JSON.stringify({
+          'type': 'authResponse',
+          'packet': {
+            'hash': password + challenge
+          }
+        }
+      ));
     };
     return miuService;
   }]);
