@@ -80,6 +80,10 @@ function PannyaController($scope, miuService) {
     }
   };
 
+  $scope.say = function() {
+    console.log($scope.sayContent);
+  }
+
   miuService.$scope.$on('receiveLog', function (ev, log) {
     console.log(log);
     $scope.$apply(function(){

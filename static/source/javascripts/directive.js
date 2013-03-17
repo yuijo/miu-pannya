@@ -8,14 +8,12 @@
 (function(){
   //pannya.value('MIU_URL', "ws://" + window.location.host);
   pannya.value('MIU_URL', "ws://localhost:8080");
+  pannya.value('NICK', "trapezoid");
   pannya.factory('miuService', ['MIU_URL', '$rootScope', function(MIU_URL, $rootScope){
     var miuService = {};
     miuService.$scope = $rootScope.$new(true);
     miuService.connection = new ReconnectingWebSocket(MIU_URL);
     miuService.connection.onopen = function(ev) {
-      //miuService.connection.send("!!!testData!!!");
-      //miuService.connection.send("!!!testData!!!");
-      //miuService.connection.send("!!!testData!!!");
       miuService.connection.send(JSON.stringify({
         'type': 'authRequest',
         'packet': {}
@@ -40,6 +38,20 @@
         }
       ));
     };
+    /**
+     *
+     * @param string network
+     * @param Object miu
+     */
+    miuService.post = function(tag, miu) {
+      this.connection.send(JSON.stringify({
+        'type': 'post',
+        'packet': {
+            'tag': tag,
+            'miu': miu
+        }
+      }));
+    }
     return miuService;
   }]);
 })();

@@ -20,4 +20,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'websocket-rack'
   gem.add_dependency 'msgpack-rpc'
   gem.add_dependency 'thin'
+  gem.add_dependency 'middleman'
+  gem.add_dependency 'thor', '~> 0.17'
 end

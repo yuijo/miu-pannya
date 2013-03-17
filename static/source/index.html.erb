@@ -9,6 +9,8 @@ title: Pannya
     <article class="room" isIconVisible="{{isIconVisible}}" ng-show="front == 'room' && room.messages">
         <section class="room-say">
             <form>
+                <input ng-model="sayContent" class="say-body" type="text" name="content">
+                <input ng-submit="say" type="submit" name="submit" value="Say">
             </form>
         </section>
         <section class="room-log">
